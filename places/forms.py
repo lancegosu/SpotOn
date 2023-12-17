@@ -1,5 +1,3 @@
-# places/forms.py
-
 from django import forms
 
 class PlaceSearchForm(forms.Form):
