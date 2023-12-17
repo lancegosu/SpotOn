@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpotOn</title>
+    <style>
+        /* Add some styling to the map container */
+        #map {
+            height: 400px;
+            margin-top: 20px;
+            border: 1px solid #ccc; /* Add a border for better visibility */
+        }
+
+        #answer {
+            white-space: pre-line;
+            margin-top: 10px; /* Adjust margin as needed */
+        }
+    </style>
+</head>
+<body>
+    <h1>SpotOn</h1>
+
+    <form method="post" action="{% url 'search_places' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+<!--        <input type="hidden" id="place-id-input" name="place_id" value="">-->
+        <button type="submit">Search</button>
+    </form>
+
+    {% if results %}
+        <h2>Search Results</h2>
+        <ol>
+            {% for result in results %}
+                <li>
+<!--                    <a href="#" onclick="event.preventDefault(); showPlaceDetails('{{ result.name }}', '{{ result.address }}', {{ result.details|safe }}, '{{ result.place_id }}'); return false;">-->
+                    <a href="#" onclick="event.preventDefault(); showPlaceDetails('{{ result.name|escapejs }}', '{{ result.address }}', {{ result.details|safe }}, '{{ result.place_id }}'); return false;">
+                        {{ result.name }} - {{ result.address }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+
+    <div id="map"></div>
+    <hr>
+    <div id="place-details">
+    <!-- Content from selected place will be populated here -->
+    </div>
+
+    <div id="place-id"></div>
+
+<!--    <div id="reviews-list" style="display: none;">-->
+<!--    &lt;!&ndash; Reviews will be populated here &ndash;&gt;-->
+<!--    </div>-->
+
+    <!-- Add a second input box for asking questions -->
+    <div id="question-box" style="display: none;">
+        <form id="question-form">
+            <label for="question-input">Ask a question about the selected place:</label>
+            <input type="text" id="question-input" placeholder="Type your question">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div id="answer" style="display: none;">
+    <!-- ChatGPT's answer will be populated here -->
+    </div>
+    <script>
+        var gmapsApiKey = "{{ api_key }}";
+        console.log('GMAPS_BROWSER_API_KEY:', gmapsApiKey);
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap" async defer></script>
+
+    <script>
+        var map;
+        var infoWindow;
+
+        function initMap() {
+            // Create a new map with a default center and zoom level
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+                center: { lat: 37.0902, lng: -95.7129 },
+            });
+
+            // Array to store LatLng objects and title text for each search result
+            var searchResults = [
+                {% for result in results %}
+                    {
+                        position: { lat: {{ result.lat }}, lng: {{ result.lng }} },
+                        title: "{{ result.name }}",
+                        address: "{{ result.address }}",
+                        details: {{ result.details|safe }},
+                        place_id: "{{ result.place_id }}"
+                    },
+                {% endfor %}
+            ];
+
+            // Add markers for the search results
+            searchResults.forEach((result, index) => {
+<!--                console.log('MrkrResflag: ', result);-->
+<!--                console.log('MrkrResDetflag: ', result.details); // Log details here-->
+                var resultLatLng = new google.maps.LatLng(result.position.lat, result.position.lng);
+                var resultMarker = new google.maps.Marker({
+                    position: resultLatLng,
+                    map: map,
+                    title: result.title,
+                    label: (index + 1).toString(),
+                });
+
+                resultMarker.addListener('click', function() {
+                    // Close the previous info window
+                    if (infoWindow) {
+                        infoWindow.close();
+                    }
+
+                    // Create a new info window and set its content
+                    infoWindow = new google.maps.InfoWindow({
+<!--                        content: '<div id="info-window-content"><strong>' + (index + 1) + '. <a href="#" id="info-window-link" onclick="showInfoWindowDetails(\'' + result.title + '\', \'' + result.address + '\', ' + JSON.stringify(result.details) + ', \'' + result.place_id + '\')">' + result.title + '</a></strong><br>' + result.address + '</div>',-->
+<!--                        content: '<div id="info-window-content"><strong>' + (index + 1) + '. <a href="#" id="info-window-link" onclick="showInfoWindowDetails(\'' + result.title + '\', \'' + result.address + '\', ' + JSON.stringify(result.details) + ')">' + result.title + '</a></strong><br>' + result.address + '</div>',-->
+<!--                        content: '<strong>' + (index + 1) + '. <a href="#" onclick="showPlaceDetails(\'' + result.title + '\', \'' + result.address + '\', ' + JSON.stringify(result.details) + ')">' + result.title + '</a></strong><br>' + result.address,-->
+                        content: '<div id="info-window-content"><strong>' + (index + 1) + '. ' + result.title + '</strong><br>' + result.address + '</div>',
+                    });
+
+                    // Open the info window at the marker's position
+                    infoWindow.open(map, resultMarker);
+
+<!--                    console.log('IWdetailflag: ', result.details)-->
+
+<!--                    showInfoWindowDetails(result.title, result.address, result.details, result.place_id);-->
+                    showPlaceDetails(result.title, result.address, result.details, result.place_id);
+
+<!--                    infoWindow.addListener('domready', function () {-->
+<!--                        var linkElement = document.getElementById('info-window-link');-->
+<!--                        console.log(linkElement);-->
+
+<!--                        // Ensure the link element is not null-->
+<!--                        if (linkElement) {-->
+<!--                            linkElement.addEventListener('click', function (event) {-->
+<!--                                event.preventDefault(); // Prevent the default link behavior-->
+
+<!--                                // Retrieve data attributes-->
+<!--                                var title = linkElement.getAttribute('data-title');-->
+<!--                                var address = linkElement.getAttribute('data-address');-->
+<!--                                var details = JSON.parse(linkElement.getAttribute('data-details'));-->
+
+<!--                                // Call the new showInfoWindowDetails function-->
+<!--                                showInfoWindowDetails(title, address, details);-->
+<!--                            });-->
+<!--                        }-->
+<!--                    });-->
+                });
+            });
+
+            // If there is more than one search result, calculate the bounds
+            if (searchResults.length > 1) {
+                var bounds = new google.maps.LatLngBounds();
+                searchResults.forEach(result => {
+                    bounds.extend(result.position);
+                });
+
+                // Fit the map to the bounds
+                map.fitBounds(bounds);
+            } else if (searchResults.length === 1) {
+                // If there is only one search result, set a reasonable zoom level
+                map.setCenter(searchResults[0].position);
+                map.setZoom(17); // Adjust this value to set the desired zoom level
+            }
+        }
+
+        function showPlaceDetails(name, address, details, place_id) {
+<!--            // Replace HTML entity representation of single quote with an actual single quote-->
+<!--            name = name.replace(/&#x27;/g, "");-->
+
+<!--            event.preventDefault(); // Prevent the default link behavior-->
+            console.log('SPDdetflag:', details);
+            // Populate the place name and address under the map
+            var placeDetailsDiv = document.getElementById('place-details');
+            placeDetailsDiv.innerHTML = '<strong>' + name + '</strong><br>' + address;
+
+            // Display additional details
+            if (details) {
+                placeDetailsDiv.innerHTML += '<p><strong>Business Status:</strong> ' + (details.business_status || 'N/A') + '</p>';
+<!--                placeDetailsDiv.innerHTML += '<p><strong>Opening Hours:</strong> ' + (details.opening_hours || 'N/A') + '</p>';-->
+                placeDetailsDiv.innerHTML += '<p><strong>Price Level:</strong> ' + (details.price_level || 'N/A') + '</p>';
+                placeDetailsDiv.innerHTML += '<p><strong>Rating:</strong> ' + (details.rating || 'N/A') + '</p>';
+                placeDetailsDiv.innerHTML += '<p><strong>Types:</strong> ' + (details.types ? details.types.join(', ') : 'N/A') + '</p>';
+                placeDetailsDiv.innerHTML += '<p><strong>User Ratings Total:</strong> ' + (details.user_ratings_total || 'N/A') + '</p>';
+<!--                placeDetailsDiv.innerHTML += '<p><strong>Place ID:</strong> ' + (place_id || 'N/A') + '</p>';-->
+                // Add more details as needed
+
+                // Update the hidden input field for place_id
+                var placeIdInput = document.getElementById('place-id');
+                placeIdInput.value = place_id || 'N/A';
+                console.log("SPDplaceidflag: " + place_id)
+            }
+
+            // Show the second input box for asking questions
+            var questionBox = document.getElementById('question-box');
+            questionBox.style.display = 'block';
+
+<!--            // Fetch and display reviews for the selected place-->
+<!--            fetchPlaceDetails(placeId);-->
+        }
+
+<!--        function showInfoWindowDetails(name, address, details, place_id) {-->
+<!--&lt;!&ndash;            console.log('iwtitleflag:', name);&ndash;&gt;-->
+<!--&lt;!&ndash;            console.log('iwaddressflag:', address);&ndash;&gt;-->
+<!--            console.log('fniwdetailflag:', details);-->
+<!--            console.log('iwplaceidflag:', place_id);-->
+
+<!--            // Populate the place name and address under the map-->
+<!--            var placeDetailsDiv = document.getElementById('place-details');-->
+<!--            placeDetailsDiv.innerHTML = '<strong>' + name + '</strong><br>' + address;-->
+
+<!--            // Display additional details-->
+<!--            if (details) {-->
+<!--                placeDetailsDiv.innerHTML += '<p><strong>Business Status:</strong> ' + (details.business_status || 'N/A') + '</p>';-->
+<!--&lt;!&ndash;                placeDetailsDiv.innerHTML += '<p><strong>Opening Hours:</strong> ' + (details.opening_hours || 'N/A') + '</p>';&ndash;&gt;-->
+<!--                placeDetailsDiv.innerHTML += '<p><strong>Price Level:</strong> ' + (details.price_level || 'N/A') + '</p>';-->
+<!--                placeDetailsDiv.innerHTML += '<p><strong>Rating:</strong> ' + (details.rating || 'N/A') + '</p>';-->
+<!--                placeDetailsDiv.innerHTML += '<p><strong>Types:</strong> ' + (details.types ? details.types.join(', ') : 'N/A') + '</p>';-->
+<!--                placeDetailsDiv.innerHTML += '<p><strong>User Ratings Total:</strong> ' + (details.user_ratings_total || 'N/A') + '</p>';-->
+<!--&lt;!&ndash;                placeDetailsDiv.innerHTML += '<p><strong>Place ID:</strong> ' + (place_id || 'N/A') + '</p>';&ndash;&gt;-->
+<!--                // Add more details as needed-->
+
+<!--                // Update the hidden input field for place_id-->
+<!--                var placeIdInput = document.getElementById('place-id');-->
+<!--                placeIdInput.value = place_id || 'N/A';-->
+<!--                console.log("SIWDflag: " + place_id)-->
+<!--            }-->
+
+<!--            // Show the second input box for asking questions-->
+<!--            var questionBox = document.getElementById('question-box');-->
+<!--            questionBox.style.display = 'block';-->
+
+<!--&lt;!&ndash;            // Fetch and display reviews for the selected place&ndash;&gt;-->
+<!--&lt;!&ndash;            fetchPlaceDetails(details.place_id);&ndash;&gt;-->
+<!--        }-->
+
+<!--        function fetchPlaceDetails(placeId) {-->
+<!--            // Make an AJAX request to fetch details from the server-->
+<!--            var xhr = new XMLHttpRequest();-->
+<!--            xhr.open('GET', `/get-place-details/?place_id=${placeId}`, true);-->
+
+<!--            xhr.onload = function () {-->
+<!--                if (xhr.status === 200) {-->
+<!--                    // Parse the response JSON-->
+<!--                    var data = JSON.parse(xhr.responseText);-->
+<!--                    console.log('Details from server:', data.details);-->
+
+<!--                    // Access the details-->
+<!--                    var details = data.details;-->
+
+<!--                    // Display details in the place details container-->
+<!--                    var placeDetailsDiv = document.getElementById('place-details');-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>Business Status:</strong> ' + (details.business_status || 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>Name:</strong> ' + (details.name || 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>Address:</strong> ' + (details.formatted_address || 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>Opening Hours:</strong> ' + (details.opening_hours || 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>Price Level:</strong> ' + (details.price_level != null ? details.price_level : 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>Rating:</strong> ' + (details.rating != null ? details.rating : 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>Types:</strong> ' + (details.types ? details.types.join(', ') : 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>User Ratings Total:</strong> ' + (details.user_ratings_total != null ? details.user_ratings_total : 'N/A') + '</p>';-->
+<!--                    placeDetailsDiv.innerHTML += '<p><strong>placeID:</strong> ' + (placeId || 'N/A') + '</p>';-->
+
+<!--                } else {-->
+<!--                    console.error('Error fetching place details:', xhr.status);-->
+<!--                }-->
+<!--            };-->
+
+<!--            xhr.send();-->
+<!--        }-->
+
+<!--        // Function to fetch and display reviews-->
+<!--        function fetchReviews(placeId) {-->
+<!--            // Make an AJAX request to fetch reviews from the server-->
+<!--            var xhr = new XMLHttpRequest();-->
+<!--            xhr.open('GET', `/get-reviews/?place_id=${placeId}`, true);-->
+
+<!--            xhr.send();-->
+<!--        }-->
+
+        // Function to retrieve CSRF token from cookies
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function askQuestion() {
+            // Retrieve the selected place details
+            var placeName = document.getElementById('place-details').querySelector('strong').innerText;
+        
+            // Retrieve the text content from the place details
+            var placeDetailsDiv = document.getElementById('place-details');
+            var placeAddress = placeDetailsDiv.textContent || placeDetailsDiv.innerText;
+
+            var placeID = document.getElementById('place-id').value;
+            console.log("AQflag: " + placeID)
+
+            // Retrieve the question from the input box
+            var questionInput = document.getElementById('question-input');
+            var question = questionInput.value.trim();
+
+            // Check if the question is not empty
+            if (question !== '') {
+                // Make an AJAX request to submit the question
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/ask-question/', true);
+
+                // Include the CSRF token in the request headers
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken')); // Assuming you have a function to get the CSRF token
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        // Parse the response JSON
+                        var data = JSON.parse(xhr.responseText);
+
+                        // Access the assistant's reply directly
+                        var assistantReply = data['answer'];
+
+                        // Display the answer below the second input box
+                        var answerSection = document.getElementById('answer');
+                        answerSection.innerHTML = '<h2>Response:</h2><p>' + assistantReply + '</p>';
+                        answerSection.style.display = 'block';
+                    } else {
+                        console.error('Error:', xhr.status);
+                    }
+                };
+
+                // Send the data as form-urlencoded
+                var formData = 'place_name=' + encodeURIComponent(placeName) +
+                    '&place_address=' + encodeURIComponent(placeAddress) +
+                    '&place_id=' + encodeURIComponent(placeID) +
+                    '&question=' + encodeURIComponent(question);
+
+                xhr.send(formData);
+
+                // Clear the input box
+                questionInput.value = '';
+            } else {
+                // Display an error message or handle the empty query case
+                console.error('Please enter a non-empty question.');
+                // Optionally, you can show an error message to the user
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add an event listener to the form
+            var questionForm = document.getElementById('question-form');
+            questionForm.addEventListener('submit', function (event) {
+                // Prevent the default form submission behavior
+                event.preventDefault();
+
+                // Call the askQuestion function to handle the question submission
+                askQuestion();
+            });
+        });
+    </script>
+</body>
+</html>
