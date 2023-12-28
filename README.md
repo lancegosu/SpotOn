@@ -10,7 +10,6 @@ SpotOn is a Django web application that integrates Google Places API for searchi
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
-- [License](#license)
 
 ## Features
 
