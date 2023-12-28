@@ -4,7 +4,7 @@ from .forms import PlaceSearchForm
 from django.http import JsonResponse
 from django.conf import settings
 
-# Create your views here.
+# Create views here.
 
 # View for searching places using the Google Places API
 def search_places(request):
