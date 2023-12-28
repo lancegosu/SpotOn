@@ -1,4 +1,4 @@
-# SpotOn - Place Search and Question Answering
+# SpotOn - Place Search and QA
 
 SpotOn is a Django web application that integrates Google Places API for searching places and ChatGPT API for generating answers based on the selected place reviews.
 
