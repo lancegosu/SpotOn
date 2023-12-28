@@ -57,7 +57,7 @@ Before you begin, ensure you have the following installed:
     python manage.py runserver
     ```
 
-2. Open your web browser and go to your local server (usually http://127.0.0.1:5000) to access SpotOn.
+2. Open your web browser and go to [http://localhost:8000/](http://localhost:8000/) to access SpotOn.
 
 3. Use the search form to search for places and view search results.
 
