@@ -4,6 +4,7 @@ SpotOn is a Django web application that allows users to search for places using 
 
 ## Table of Contents
 
+- [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -11,13 +12,15 @@ SpotOn is a Django web application that allows users to search for places using 
 - [Configuration](#configuration)
 - [License](#license)
 
-## Prerequisites
+## Features
 
-Before you begin, ensure you have the following installed:
+- **Place Search**: Utilize the Google Places API to search for places based on user queries.
 
-- Python (3.6 or higher)
-- Django
-- Requests library (`pip install requests`)
+- **Review-based Q&A**: Leverage place reviews to answer user queries intelligently using OpenAI's GPT-3.5-turbo language model.
+
+- **Interactive Map**: Display search results on an interactive map for enhanced user experience.
+
+- **Dynamic UI**: Dynamically update the interface to allow users to ask questions about selected places and receive AI-generated responses.
 
 ## Installation
 
