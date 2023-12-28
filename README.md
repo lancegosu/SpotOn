@@ -13,7 +13,7 @@ SpotOn is a Django web application that integrates Google Places API for searchi
 
 ## Purpose
 
-SpotOn seamlessly integrates the power of location-based information retrieval and advanced language understanding to redefine user interactions with places. By harnessing the Google Places API, the application enables place searches, while using OpenAI's GPT-3.5-turbo to intelligently answer user queries based on curated place reviews. The project aims to provide a dynamic and interactive platform where users can effortlessly explore places, ask questions, and receive AI-generated responses, enhancing the overall user experience in navigating and understanding their location. SpotOn stands at the intersection of geospatial intelligence and natural language processing, transforming how users engage with location-based information through an intuitive web interface.
+SpotOn serves as a comprehensive and intelligent solution for location-based information retrieval. By seamlessly integrating the Google Places API and OpenAI's GPT-3.5-turbo language model, SpotOn transforms the conventional place-search experience. The primary aim is to empower users to not only discover places of interest but also engage in dynamic and conversational interactions with the system. Through intuitive features like review-based Q&A and an interactive map display, SpotOn redefines how users explore and interact with location-centric data, fostering a more engaging and insightful user experience.
 
 ## Features
 
