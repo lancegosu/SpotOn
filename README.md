@@ -82,3 +82,7 @@ SpotOn serves as a comprehensive and intelligent solution for location-based inf
 - **Google Maps API Key**: Obtain your API key from the [Google Cloud Console](https://console.cloud.google.com/), enable the Places API, and set the key in `GMAPS_API_KEY` in `settings.py`.
 
 - **OpenAI API Key**: Obtain your API key from the [OpenAI API](https://beta.openai.com/signup/), and set the key in `OPENAI_API_KEY` in `settings.py`.
+
+## Note
+
+Make sure to comply with OpenAI's use-case policies and guidelines when using this app.
