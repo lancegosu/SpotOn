@@ -10,6 +10,7 @@ SpotOn is a Django web application that integrates Google Places API for searchi
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
+- [Contributions](#contributions)
 - [Note](#note)
 
 ## Purpose
@@ -83,6 +84,9 @@ SpotOn serves as a comprehensive and intelligent solution for location-based inf
 - **Google Maps API Key**: Obtain your API key from the [Google Cloud Console](https://console.cloud.google.com/), enable the Places API, and set the key in `GMAPS_API_KEY` in `settings.py`.
 
 - **OpenAI API Key**: Obtain your API key from the [OpenAI API](https://beta.openai.com/signup/), and set the key in `OPENAI_API_KEY` in `settings.py`.
+
+## Contributing
+Contributions are welcome! Feel free to open issues and pull requests.
 
 ## Note
 
